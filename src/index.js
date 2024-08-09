@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/web');
 const usersRoutes = require('./routes/usersRoutes');
 const perishableRoutes = require('./routes/perishableProductRoutes')
+const nonPerishableRoutes = require('./routes/nonPerishableProductsRoutes')
 const cors = require('cors');
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 authRoutes(app);
 usersRoutes(app);
 app.use('/', perishableRoutes);
+app.use('/', nonPerishableRoutes);
 
 app.get('/', (req, res) => {
   res.send('Bienvenido');
