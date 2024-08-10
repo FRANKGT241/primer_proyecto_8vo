@@ -21,6 +21,7 @@ schedulesRoutes(app);
 perishableRoutes(app);
 nonPerishableRoutes(app);
 
+
 app.get('/', (req, res) => {
   res.send('Bienvenido');
 });
