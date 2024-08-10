@@ -102,5 +102,7 @@ module.exports = {
     } catch (error) {
       res.status(500).json({ error: 'Error updating product status' });
     }
-  }
+  },
+
+
 }

@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 authRoutes(app);
 usersRoutes(app);
 schedulesRoutes(app);
-app.use('/', perishableRoutes);
+perishableRoutes(app);
 
 app.get('/', (req, res) => {
   res.send('Bienvenido');
