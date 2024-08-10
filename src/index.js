@@ -5,6 +5,7 @@ const usersRoutes = require('./routes/usersRoutes');
 const perishableRoutes = require('./routes/perishableProductRoutes')
 const schedulesRoutes = require('./routes/schedulesRoutes')
 const nonPerishableRoutes = require('./routes/nonPerishableProductsRoutes')
+const categoryRoutes = require('./routes/categoryRoutes');
 
 const cors = require('cors');
 
@@ -20,7 +21,7 @@ usersRoutes(app);
 schedulesRoutes(app);
 perishableRoutes(app);
 nonPerishableRoutes(app);
-
+categoryRoutes(app);
 
 app.get('/', (req, res) => {
   res.send('Bienvenido');
