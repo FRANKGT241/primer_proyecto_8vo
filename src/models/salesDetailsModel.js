@@ -19,7 +19,7 @@ const SalesDetail = sequelize.define('SalesDetail', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'non_perishable_products', //pendiente de corregir para saber si es non_perishable_products o products
+            model: 'non_perishable_products', //pendiente de corregir para saber si es non_perishable_products o perishable_products
             key: 'product_id'
         }
     },
