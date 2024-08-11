@@ -1,0 +1,25 @@
+POST http://localhost:3001/web/api/perishableProducts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluaXN0cmF0b3IiLCJpYXQiOjE3MjMzMzMxMzEsImV4cCI6MTcyMzMzNjczMX0.7thS1SvbHcJ8TZBc9Msc8gPM8RIT_DKgMM-0hrLN6fU
+
+{
+	"product_name": "Coca Cola",
+	"price": 2.5,
+	"quantity": 100,
+	"expiration_date": "2022-12-31",
+	"production_date": "2022-01-01",
+	"category_id": 1
+}
+
+###
+
+POST http://localhost:3001/web/api/batch
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluaXN0cmF0b3IiLCJpYXQiOjE3MjMzMzMxMzEsImV4cCI6MTcyMzMzNjczMX0.7thS1SvbHcJ8TZBc9Msc8gPM8RIT_DKgMM-0hrLN6fU
+
+{
+	"product_id": 7,
+	"quantity": 100,
+	"expiration_date": "2022-12-31",
+	"production_date": "2022-01-01"
+}

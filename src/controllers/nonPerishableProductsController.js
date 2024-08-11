@@ -1,10 +1,11 @@
 const nonPerishableProduct = require('../models/nonPerishableProductsModel');
+const Batch = require('../models/batchModel');
 
 module.exports = {
 
   //create product
   createProduct: async (req, res) => {
-    const { product_name, category_id, price, quantity, is_active } = req.body;
+    const { product_name, category_id, price, quantity, } = req.body;
 
     console.log('Request Body:', req.body);
 
@@ -18,12 +19,11 @@ module.exports = {
         category_id: category_id || null,
         price,
         quantity,
-        is_active: is_active !== undefined ? is_active : true,
+        is_active: true,
       });
-
       res.status(201).json({ message: 'Product created successfully', productId: product.product_id });
     } catch (error) {
-      res.status(500).json({ error: 'Error creating product' });
+      res.status(500).json({ error: 'Error creating product, ' + error });
     }
   },
 
