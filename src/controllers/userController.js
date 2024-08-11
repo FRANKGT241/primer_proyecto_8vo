@@ -99,7 +99,7 @@ module.exports = {
         return res.status(404).json({ error: 'User not found' });
       }
   
-      user.is_active = false;
+      user.is_active = user.is_active === 1 ? 0 : 1;
       await user.save();
   
       res.json({ message: 'User status updated to inactive' });
