@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
+const Sale = require('./salesModel');
 
 const SalesDetail = sequelize.define('SalesDetail', {
     detail_id: {
@@ -40,5 +41,7 @@ const SalesDetail = sequelize.define('SalesDetail', {
     tableName: 'sales_details',
     timestamps: false
 });
+
+SalesDetail.belongsTo(Sale, { foreignKey: 'sale_id' });
 
 module.exports = SalesDetail;

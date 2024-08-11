@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
+const SalesDetail = require('./salesDetailsModel');
 
 const Sale = sequelize.define('Sale', {
     sale_id: {
@@ -28,7 +29,7 @@ const Sale = sequelize.define('Sale', {
         allowNull: false,
         references: {
             model: 'customers',
-            key: 'customer_id' //no se incluye en el diagrama de base de datos
+            key: 'customer_id' //Customer no se incluye en el diagrama de base de datos
         }
     },
     is_active: {
@@ -41,4 +42,5 @@ const Sale = sequelize.define('Sale', {
     timestamps: false,
 });
 
+Sale.hasMany(SalesDetail, { foreignKey: 'sale_id', as: 'details' });
 module.exports = Sale;
