@@ -1,11 +1,9 @@
-const nonPerishableProduct = require('../models/nonPerishableProductsModel');
-const Batch = require('../models/batchModel');
+const NonPerishableProduct = require('../models/nonPerishableProductsModel');
 
 module.exports = {
-
-  //create product
+  // Create
   createProduct: async (req, res) => {
-    const { product_name, category_id, price, quantity, } = req.body;
+    const { product_name, category_id, price, quantity } = req.body;
 
     console.log('Request Body:', req.body);
 
@@ -14,37 +12,39 @@ module.exports = {
     }
 
     try {
-      const product = await nonPerishableProduct.create({
+      const product = await NonPerishableProduct.create({
         product_name,
         category_id: category_id || null,
         price,
         quantity,
         is_active: true,
       });
+
       res.status(201).json({ message: 'Product created successfully', productId: product.product_id });
     } catch (error) {
       res.status(500).json({ error: 'Error creating product, ' + error });
     }
   },
 
-  //Get all products
+  // Get all products
   getAllProducts: async (req, res) => {
     try {
-      const products = await nonPerishableProduct.findAll({
+      const products = await NonPerishableProduct.findAll({
         attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active'],
+        where: { is_active: true },
       });
       res.json(products);
     } catch (error) {
-      res.status(500).json({ error: 'Error fetching products' });
+      res.status(500).json({ error: 'Error fetching products,' + error });
     }
   },
 
-  // Get product by id
+  // Obtener productos por Id
   getProductById: async (req, res) => {
     const { id } = req.params;
 
     try {
-      const product = await nonPerishableProduct.findByPk(id, {
+      const product = await NonPerishableProduct.findByPk(id, {
         attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active'],
       });
 
@@ -58,16 +58,16 @@ module.exports = {
     }
   },
 
-  // Update product
+  // Actualizar productos
   updateProduct: async (req, res) => {
     const { id } = req.params;
     const { product_name, category_id, price, quantity, is_active } = req.body;
 
     try {
-      const product = await nonPerishableProduct.findByPk(id);
+      const product = await NonPerishableProduct.findByPk(id);
 
       if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: 'Product not found, ' + error });
       }
 
       if (product_name) product.product_name = product_name;
@@ -80,16 +80,16 @@ module.exports = {
 
       res.json({ message: 'Product updated successfully', product });
     } catch (error) {
-      res.status(500).json({ error: 'Error updating product' });
+      res.status(500).json({ error: 'Error updating product, ' + error });
     }
   },
 
-  // Delete product
+  // Cambiar estado de producto
   deleteProduct: async (req, res) => {
     const { id } = req.params;
 
     try {
-      const product = await nonPerishableProduct.findByPk(id);
+      const product = await NonPerishableProduct.findByPk(id);
 
       if (!product) {
         return res.status(404).json({ error: 'Product not found' });
@@ -102,5 +102,7 @@ module.exports = {
     } catch (error) {
       res.status(500).json({ error: 'Error updating product status' });
     }
-  }
+  },
+
+
 }

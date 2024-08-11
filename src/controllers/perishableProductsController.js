@@ -43,10 +43,11 @@ module.exports = {
     try {
       const products = await PerishableProduct.findAll({
         attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active'],
+        where: { is_active: true },
       });
       res.json(products);
     } catch (error) {
-      res.status(500).json({ error: 'Error fetching products' });
+      res.status(500).json({ error: 'Error fetching products,' + error });
     }
   },
 
