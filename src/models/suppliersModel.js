@@ -19,6 +19,10 @@ const Supplier = sequelize.define('Supplier', {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 	},
+	phone: {
+		type: DataTypes.STRING,
+		allowNull: false,
+	},
 }, {
 	tableName: 'suppliers',
 	timestamps: false,

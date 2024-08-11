@@ -23,6 +23,10 @@ const Customer = sequelize.define('Customer', {
 		type: DataTypes.STRING,
 		allowNull: false,
 	},
+	is_active: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+	},
 }, {
 	tableName: 'customers',
 	timestamps: false,
