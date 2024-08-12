@@ -6,6 +6,10 @@ const perishableRoutes = require('./routes/perishableProductRoutes')
 const schedulesRoutes = require('./routes/schedulesRoutes')
 const nonPerishableRoutes = require('./routes/nonPerishableProductsRoutes')
 const salesRoutes = require('./routes/salesRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const batchRoutes = require('./routes/batchRoutes');
+const suppliersRoutes = require('./routes/suppliersRoutes');
+const customerRoutes = require('./routes/customersRoutes');
 
 const cors = require('cors');
 
@@ -23,6 +27,10 @@ schedulesRoutes(app);
 perishableRoutes(app);
 nonPerishableRoutes(app);
 salesRoutes(app);
+categoryRoutes(app);
+batchRoutes(app);
+suppliersRoutes(app);
+customerRoutes(app);
 
 app.get('/', (req, res) => {
   res.send('Bienvenido');
