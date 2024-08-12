@@ -3,7 +3,7 @@ const NonPerishableProduct = require('../models/nonPerishableProductsModel');
 module.exports = {
   // Create
   createProduct: async (req, res) => {
-    const { product_name, category_id, price, quantity } = req.body;
+    const { product_name, category_id, price, quantity, supplier_id } = req.body;
 
     console.log('Request Body:', req.body);
 
@@ -14,6 +14,7 @@ module.exports = {
     try {
       const product = await NonPerishableProduct.create({
         product_name,
+        supplier_id: supplier_id || null,
         category_id: category_id || null,
         price,
         quantity,
@@ -30,7 +31,7 @@ module.exports = {
   getAllProducts: async (req, res) => {
     try {
       const products = await NonPerishableProduct.findAll({
-        attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active'],
+        attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active', 'supplier_id'],
         where: { is_active: true },
       });
       res.json(products);
@@ -45,7 +46,7 @@ module.exports = {
 
     try {
       const product = await NonPerishableProduct.findByPk(id, {
-        attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active'],
+        attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active', 'supplier_id'],
       });
 
       if (!product) {
@@ -61,7 +62,7 @@ module.exports = {
   // Actualizar productos
   updateProduct: async (req, res) => {
     const { id } = req.params;
-    const { product_name, category_id, price, quantity, is_active } = req.body;
+    const { product_name, category_id, price, quantity, is_active, supplier_id } = req.body;
 
     try {
       const product = await NonPerishableProduct.findByPk(id);
@@ -75,6 +76,7 @@ module.exports = {
       if (price) product.price = price;
       if (quantity) product.quantity = quantity;
       if (is_active !== undefined) product.is_active = is_active;
+      if (supplier_id) product.supplier_id = supplier_id;
 
       await product.save();
 

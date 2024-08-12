@@ -1,6 +1,6 @@
 POST http://localhost:3001/web/api/perishableProducts
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluaXN0cmF0b3IiLCJpYXQiOjE3MjM0MTQ0MjAsImV4cCI6MTcyMzQxODAyMH0.WciwILKuiUrpeM0SHXPi3IzASYSeoQPLtJsb3Eess3o
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluaXN0cmF0b3IiLCJpYXQiOjE3MjM0MTkyOTYsImV4cCI6MTcyMzQyMjg5Nn0.rJ-h4jjKGUy6p7kXROuudGHcBxpi12wqH44zuVZ-QTs
 
 {
 	"product_name": "Cocaaaa",
@@ -8,7 +8,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 	"quantity": 100,
 	"expiration_date": "2022-12-31",
 	"production_date": "2022-01-01",
-	"category_id": 1
+	"category_id": 1,
+	"supplier_id": 1
 }
 
 ###

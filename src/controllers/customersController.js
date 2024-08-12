@@ -19,7 +19,7 @@ module.exports = {
 			});
 			res.json(customers);
 		} catch (error) {
-			res.status(500).json({ error: 'Error fetching customers' });
+			res.status(500).json({ error: 'Error fetching customers, ' + error });
 		}
 	},
 

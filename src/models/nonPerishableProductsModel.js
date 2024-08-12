@@ -31,6 +31,14 @@ const nonPerishableProduct = sequelize.define('nonPerishableProduct', {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true
+    },
+    supplier_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'suppliers',
+            key: 'supplier_id'
+        }
     }
 }, {
     tableName: 'non_perishable_products',

@@ -6,7 +6,14 @@ module.exports = {
 	// Post a new batch
 	async createBatch(req, res) {
 		try {
-			const batch = await batchModel.create(req.body);
+			const { product_id, quantity, production_date, expiration_date } = req.body;
+			const batch = await batchModel.create({
+				product_id,
+				quantity,
+				production_date,
+				expiration_date,
+				is_active: true,
+			});
 			// Add quantity to the product
 			const product = await perishableProductsModel.findByPk(req.body.product_id);
 			product.quantity += req.body.quantity;

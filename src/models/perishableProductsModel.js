@@ -33,6 +33,14 @@ const PerishableProduct = sequelize.define('PerishableProduct', {
         allowNull: false,
         defaultValue: true,
     },
+    supplier_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'suppliers',
+            key: 'supplier_id',
+        },
+    },
 }, {
     tableName: 'perishable_products',
     timestamps: false,
