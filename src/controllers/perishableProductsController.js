@@ -80,7 +80,7 @@ module.exports = {
       const product = await PerishableProduct.findByPk(id);
 
       if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: 'Product not found, ' + error });
       }
 
       if (product_name) product.product_name = product_name;
@@ -94,7 +94,7 @@ module.exports = {
 
       res.json({ message: 'Product updated successfully', product });
     } catch (error) {
-      res.status(500).json({ error: 'Error updating product' + error });
+      res.status(500).json({ error: 'Error updating product, ' + error });
     }
   },
 
