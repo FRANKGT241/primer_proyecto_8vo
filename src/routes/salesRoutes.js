@@ -5,7 +5,7 @@ const authController = require('../controllers/authController');
 
 // Rutas CRUD para ventas
 router.post('/sales', salesController.createSale);
-
+router.put('/salesUpdate', salesController.updateSale);
 
 
 module.exports = (app) => {

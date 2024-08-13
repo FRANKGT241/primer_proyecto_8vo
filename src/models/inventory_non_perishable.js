@@ -1,7 +1,8 @@
+// models/inventoryNonPerishable.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../database');
+const sequelize = require('../database'); // Ajusta la ruta según tu configuración
 
-const Inventory = sequelize.define('Inventory', {
+const InventoryNonPerishable = sequelize.define('InventoryNonPerishable', {
   inventory_id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -9,10 +10,6 @@ const Inventory = sequelize.define('Inventory', {
   },
   product_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  product_type: {
-    type: DataTypes.ENUM('Perishable', 'Non Perishable'),
     allowNull: false,
   },
   quantity: {
@@ -24,13 +21,12 @@ const Inventory = sequelize.define('Inventory', {
     allowNull: false,
   },
   is_active: {
-    type: DataTypes.TINYINT(1),
-    allowNull: false,
-    defaultValue: 1,
-  }
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
 }, {
-  tableName: 'inventory',
+  tableName: 'inventory_non_perishable',
   timestamps: false,
 });
 
-module.exports = Inventory;
+module.exports = InventoryNonPerishable;

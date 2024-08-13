@@ -31,7 +31,7 @@ const PerishableProduct = sequelize.define('PerishableProduct', {
     is_active: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
+        defaultValue: 1, 
     },
     supplier_id: {
         type: DataTypes.INTEGER,
