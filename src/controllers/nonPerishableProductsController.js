@@ -1,5 +1,5 @@
 const NonPerishableProduct = require('../models/nonPerishableProductsModel');
-const InventoryNonPerishable = require('../models/inventory_non_perishable');
+const InventoryNonPerishable = require('../models/inventoryNonPerishable');
 const sequelize = require('../database');
 module.exports = {
   // Create

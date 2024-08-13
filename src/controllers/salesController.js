@@ -1,7 +1,7 @@
 const Sale = require('../models/salesModel');
 const SalesDetail = require('../models/salesDetailsModel');
-const InventoryPerishable = require('../models/inventory_perishable');
-const InventoryNonPerishable = require('../models/inventory_non_perishable');
+const InventoryPerishable = require('../models/inventoryPerishable');
+const InventoryNonPerishable = require('../models/inventoryNonPerishable');
 const PerishableProduct = require('../models/perishableProductsModel');
 const NonPerishableProduct = require('../models/nonPerishableProductsModel');
 const sequelize = require('../database');
@@ -139,109 +139,138 @@ module.exports = {
 updateSale: async (req, res) => {
   const t = await sequelize.transaction();
   try {
-      const { sale_id, details } = req.body;
-      if (!sale_id || !details || !Array.isArray(details) || details.length === 0) {
-          return res.status(400).json({ message: 'Datos de entrada inválidos' });
+    const { sale_id, details } = req.body;
+    if (!sale_id || !details || !Array.isArray(details) || details.length === 0) {
+      return res.status(400).json({ message: 'Datos de entrada inválidos' });
+    }
+
+    // Buscar la venta existente
+    const sale = await Sale.findByPk(sale_id);
+    if (!sale) {
+      return res.status(404).json({ message: 'Venta no encontrada' });
+    }
+
+    // Obtener detalles de venta existentes
+    const existingDetails = await SalesDetail.findAll({
+      where: { sales_sale_id: sale_id },
+      transaction: t
+    });
+
+    // Mapear detalles existentes por ID de inventario
+    const existingDetailsMap = new Map();
+    existingDetails.forEach(detail => {
+      if (detail.inventory_perishable_id) {
+        existingDetailsMap.set(detail.inventory_perishable_id, detail);
+      }
+      if (detail.inventory_non_perishable_id) {
+        existingDetailsMap.set(detail.inventory_non_perishable_id, detail);
+      }
+    });
+
+    let total = 0;
+
+    // Actualizar o eliminar detalles de venta existentes
+    for (let detail of details) {
+      const { inventory_id, quantity, unit_price, product_type, customers_customer_id } = detail;
+      let InventoryModel;
+      let ProductModel;
+      let productId;
+      let existingDetail;
+
+      if (product_type === 'Perishable') {
+        InventoryModel = InventoryPerishable;
+        ProductModel = PerishableProduct;
+        productId = inventory_id;  // ID del producto perecedero
+        existingDetail = existingDetailsMap.get(productId);
+
+      } else if (product_type === 'Non Perishable') {
+        InventoryModel = InventoryNonPerishable;
+        productId = inventory_id;  // ID del producto no perecedero
+        existingDetail = existingDetailsMap.get(productId);
+
+      } else {
+        throw new Error('Tipo de producto inválido');
       }
 
-      const sale = await Sale.findByPk(sale_id);
-      if (!sale) {
-          return res.status(404).json({ message: 'Venta no encontrada' });
+      let oldQuantity = existingDetail ? existingDetail.quantity : 0;
+      let quantityDifference = quantity - oldQuantity;
+
+      // Actualizar inventario
+      if (quantityDifference !== 0) {
+        if (quantityDifference > 0) {
+          await InventoryModel.decrement('quantity', {
+            by: quantityDifference,
+            where: { inventory_id: productId },
+            transaction: t
+          });
+        } else {
+          await InventoryModel.increment('quantity', {
+            by: -quantityDifference,
+            where: { inventory_id: productId },
+            transaction: t
+          });
+        }
+
+        if (product_type === 'Perishable') {
+          await ProductModel.increment('quantity', {
+            by: quantityDifference,
+            where: { product_id: productId },
+            transaction: t
+          });
+        }
       }
 
-      const existingDetails = await SalesDetail.findAll({
-          where: { sales_sale_id: sale_id },
+      // Actualizar o insertar el detalle de venta
+      if (existingDetail) {
+        await existingDetail.update({
+          quantity,
+          unit_price,
+          customers_customer_id
+        }, { transaction: t });
+      } else {
+        await SalesDetail.create({
+          inventory_perishable_id: product_type === 'Perishable' ? productId : null,
+          inventory_non_perishable_id: product_type === 'Non Perishable' ? productId : null,
+          quantity,
+          unit_price,
+          sales_sale_id: sale_id,
+          customers_customer_id
+        }, { transaction: t });
+      }
+
+      // Calcular el total de la venta
+      total += quantity * unit_price;
+    }
+
+    // Eliminar detalles de venta que ya no están en el detalle
+    const updatedInventoryIds = new Set(details.map(detail => detail.inventory_id));
+    const obsoleteDetails = existingDetails.filter(detail => !updatedInventoryIds.has(detail.inventory_perishable_id) && !updatedInventoryIds.has(detail.inventory_non_perishable_id));
+    for (let obsoleteDetail of obsoleteDetails) {
+      if (obsoleteDetail.inventory_perishable_id) {
+        await InventoryPerishable.increment('quantity', {
+          by: obsoleteDetail.quantity,
+          where: { inventory_id: obsoleteDetail.inventory_perishable_id },
           transaction: t
-      });
-
-      const existingDetailsMap = new Map();
-      existingDetails.forEach(detail => {
-          existingDetailsMap.set(detail.inventory_perishable_id || detail.inventory_non_perishable_id, detail);
-      });
-
-      let total = 0;
-
-      for (let detail of details) {
-          const { inventory_id, quantity, unit_price, product_type, customers_customer_id } = detail;
-          let InventoryModel;
-          let ProductModel;
-
-          if (product_type === 'Perishable') {
-              InventoryModel = InventoryPerishable;
-              ProductModel = PerishableProduct;
-
-              let existingDetail = existingDetailsMap.get(inventory_id);
-              let oldQuantity = existingDetail ? existingDetail.quantity : 0;
-              let quantityDifference = quantity - oldQuantity;
-
-              if (quantityDifference !== 0) {
-                  if (quantityDifference > 0) {
-                      await InventoryModel.decrement('quantity', {
-                          by: quantityDifference,
-                          where: { inventory_id },
-                          transaction: t
-                      });
-                  } else {
-                      await InventoryModel.increment('quantity', {
-                          by: -quantityDifference,
-                          where: { inventory_id },
-                          transaction: t
-                      });
-                  }
-
-                  await ProductModel.increment('sold_quantity', {
-                      by: quantityDifference,
-                      where: { product_id: inventory_id },
-                      transaction: t
-                  });
-              }
-
-          } else if (product_type === 'Non Perishable') {
-              InventoryModel = InventoryNonPerishable;
-
-              let existingDetail = existingDetailsMap.get(inventory_id);
-              let oldQuantity = existingDetail ? existingDetail.quantity : 0;
-              let quantityDifference = quantity - oldQuantity;
-
-              if (quantityDifference !== 0) {
-                  if (quantityDifference > 0) {
-                      await InventoryModel.increment('quantity', {
-                          by: quantityDifference,
-                          where: { inventory_id },
-                          transaction: t
-                      });
-                  } else {
-                      await InventoryModel.decrement('quantity', {
-                          by: -quantityDifference,
-                          where: { inventory_id },
-                          transaction: t
-                      });
-                  }
-              }
-          } else {
-              throw new Error('Tipo de producto inválido');
-          }
-
-          await SalesDetail.upsert({
-              inventory_perishable_id: product_type === 'Perishable' ? inventory_id : null,
-              inventory_non_perishable_id: product_type === 'Non Perishable' ? inventory_id : null,
-              quantity,
-              unit_price,
-              sales_sale_id: sale_id,
-              customers_customer_id
-          }, { transaction: t });
+        });
+      } else if (obsoleteDetail.inventory_non_perishable_id) {
+        await InventoryNonPerishable.increment('quantity', {
+          by: obsoleteDetail.quantity,
+          where: { inventory_id: obsoleteDetail.inventory_non_perishable_id },
+          transaction: t
+        });
       }
+      await obsoleteDetail.update({ is_active: 0 }, { transaction: t });
+    }
 
-      await sale.update({ total, user_id: req.body.user_id }, { transaction: t });
-      await t.commit();
-      res.status(200).json({ message: 'Venta actualizada correctamente' });
+    // Actualizar la venta con el nuevo total
+    await sale.update({ total, user_id: req.body.user_id }, { transaction: t });
+    await t.commit();
+    res.status(200).json({ message: 'Venta actualizada correctamente' });
   } catch (error) {
-      await t.rollback();
-      res.status(500).json({ message: 'Error al actualizar la venta', error: error.message });
+    await t.rollback();
+    res.status(500).json({ message: 'Error al actualizar la venta', error: error.message });
   }
 },
-
-
 
 
 
@@ -282,17 +311,18 @@ Cursl update:curl --location --request PUT 'http://localhost:3001/web/api/salesU
 '
 
 Curl create
-curl --location 'http://localhost:3001/web/api/sales' \
+curl --location --request PUT 'http://localhost:3001/web/api/salesUpdate' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwicm9sZSI6IkVtcGxveWVlIiwiaWF0IjoxNzIzNTM2NTM0LCJleHAiOjE3MjM1NDAxMzR9.pw2XG6ObuRdT2NS5B1ebvAX1m8QSRX61KJpZQ_s-kRU' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwicm9sZSI6IkVtcGxveWVlIiwiaWF0IjoxNzIzNTQwMzg0LCJleHAiOjE3MjM1NDM5ODR9.RtR-eYo-VQwrfTxRhOlIIR68Kcqn7yJTTqfrZzOlKSc' \
 --data '{
+  "sale_id": 33,
   "user_id": 6,
   "details": [
     {
       "inventory_id": 34,
-      "quantity": 2,
-      "unit_price": 111.00,
-      "product_type": "Non Perishable",
+      "quantity":2,
+      "unit_price": 10.00,
+      "product_type": "Perishable",
       "customers_customer_id": 6
     }
   ]

@@ -1,6 +1,6 @@
 const PerishableProduct = require('../models/perishableProductsModel');
 const Batch = require('../models/batchModel');
-const InventoryPerishable  = require('../models/inventory_perishable');
+const InventoryPerishable  = require('../models/inventoryPerishable');
 const sequelize = require('../database');
 
 module.exports = {
