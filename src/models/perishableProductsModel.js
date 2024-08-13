@@ -49,6 +49,7 @@ const PerishableProduct = sequelize.define('PerishableProduct', {
 PerishableProduct.hasMany(Batch, {
     foreignKey: 'product_id',
 });
+
 Batch.belongsTo(PerishableProduct, {
     foreignKey: 'product_id',
 });

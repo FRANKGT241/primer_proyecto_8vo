@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 const SalesDetail = require('./salesDetailsModel');
 
+
 const Sale = sequelize.define('Sale', {
     sale_id: {
         type: DataTypes.INTEGER,
@@ -43,4 +44,6 @@ const Sale = sequelize.define('Sale', {
 });
 
 Sale.hasMany(SalesDetail, { foreignKey: 'sale_id', as: 'details' });
+SalesDetail.belongsTo(Sale, { foreignKey: 'sale_id', as: 'sale' });
+
 module.exports = Sale;
