@@ -1,111 +1,68 @@
 const Sale = require('../models/salesModel');
 const SalesDetail = require('../models/salesDetailsModel');
+const Inventory = require('../models/inventoryModel');
+const sequelize  = require('../database');
 
 module.exports = {
-
-  // Create a new sale
   createSale: async (req, res) => {
-    const { date, total, user_id, customer_id } = req.body;
-
-    if (!date || !total || !user_id || !customer_id) {
-      return res.status(400).json({ error: 'Date, total, user_id, and customer_id are required' });
-    }
-
+    const t = await sequelize.transaction();
     try {
-      const sale = await Sale.create({
-        date,
-        total,
-        user_id,
-        customer_id,
-        is_active: true,
-      });
-      res.status(201).json({ message: 'Sale created successfully', sale_id: sale.sale_id });
-    } catch (error) {
-      res.status(500).json({ error: 'Error creating sale, ' + error });
-    }
-  },
-
-  // Get all sales
-  getAllSales: async (req, res) => {
-    try {
-      const sales = await Sale.findAll({
-        attributes: ['sale_id', 'date', 'total', 'user_id', 'customer_id', 'is_active'],
-      });
-      res.json(sales);
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching sales' });
-    }
-  },
-
-  // Get sale by ID
-  getSaleById: async (req, res) => {
-    const { id } = req.params;
-
-    try {
-      const sale = await Sale.findByPk(id, {
-        attributes: ['sale_id', 'date', 'total', 'user_id', 'customer_id', 'is_active'],
-        include: [
-          {
-            model: SalesDetail,
-            as: 'details',
-            attributes: ['detail_id', 'product_id', 'quantity', 'unit_price', 'is_active']
-          }
-        ]
-      });
-
-      if (!sale) {
-        return res.status(404).json({ error: 'Sale not found' });
+      const { date, total, user_id, details } = req.body;
+      
+      // Validar la entrada
+      if (!date || !total || !user_id || !details || !Array.isArray(details) || details.length === 0) {
+        return res.status(400).json({ message: 'Datos de entrada inválidos' });
       }
 
-      res.json(sale);
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching sale' });
-    }
-  },
+      // Crear la venta
+      const sale = await Sale.create({ date, total, user_id }, { transaction: t });
 
-  // Update sale
-  updateSale: async (req, res) => {
-    const { id } = req.params;
-    const { date, total, user_id, customer_id, is_active } = req.body;
+      // Procesar cada detalle de venta
+      for (let detail of details) {
+        const { inventory_id, quantity, unit_price, product_type } = detail;
 
-    try {
-      const sale = await Sale.findByPk(id);
+        // Validar los detalles de la venta
+        if (!inventory_id || !quantity || !unit_price || !product_type) {
+          throw new Error('Datos del detalle de venta inválidos');
+        }
 
-      if (!sale) {
-        return res.status(404).json({ error: 'Sale not found' });
+        // Crear el detalle de la venta
+        await SalesDetail.create({
+          inventory_id,
+          quantity,
+          unit_price,
+          sale_id: sale.sale_id
+        }, { transaction: t });
+
+        // Actualizar la cantidad en inventario
+        const inventory = await Inventory.findByPk(inventory_id, { transaction: t });
+        if (!inventory) {
+          throw new Error(`Inventario con ID ${inventory_id} no encontrado`);
+        }
+
+        if (inventory.is_active === 0) {
+          throw new Error(`El producto con ID ${inventory_id} está inactivo`);
+        }
+
+        if (inventory.quantity < quantity) {
+          throw new Error(`No hay suficiente cantidad en inventario para el producto con ID ${inventory_id}`);
+        }
+
+        // Descontar la cantidad del inventario
+        await Inventory.decrement('quantity', {
+          by: quantity,
+          where: { inventory_id },
+          transaction: t
+        });
       }
 
-      if (date) sale.date = date;
-      if (total) sale.total = total;
-      if (user_id) sale.user_id = user_id;
-      if (customer_id) sale.customer_id = customer_id;
-      if (is_active !== undefined) sale.is_active = is_active;
-
-      await sale.save();
-
-      res.json({ message: 'Sale updated successfully', sale });
+      // Confirmar la transacción
+      await t.commit();
+      res.status(201).json(sale);
     } catch (error) {
-      res.status(500).json({ error: 'Error updating sale' });
-    }
-  },
-
-  // Delete sale (soft delete)
-  deleteSale: async (req, res) => {
-    const { id } = req.params;
-
-    try {
-      const sale = await Sale.findByPk(id);
-
-      if (!sale) {
-        return res.status(404).json({ error: 'Sale not found' });
-      }
-
-      sale.is_active = false;
-      await sale.save();
-
-      res.json({ message: 'Sale status updated to inactive' });
-    } catch (error) {
-      res.status(500).json({ error: 'Error updating sale status' });
+      // Deshacer la transacción en caso de error
+      await t.rollback();
+      res.status(500).json({ message: 'Error al crear la venta', error: error.message });
     }
   }
-}
+};
