@@ -7,6 +7,7 @@ module.exports = (app) => {
 
   router.post('/login', authController.login);
   router.post('/logout', authController.logout);
+  router.post('/loginT', authController.logintest);
   router.get('/protected', authController.authenticateToken, authController.protectedRoute);
 
   app.use('/auth', router);  // Prefijo '/auth' para todas las rutas de autenticación

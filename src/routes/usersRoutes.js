@@ -12,7 +12,7 @@ router.get('/users/:id', userController.getUserById);
 
 router.put('/users/:id', userController.updateUser);
 
-router.delete('/users/:id', userController.deleteUser);
+router.patch('/users/:id', userController.deleteUser);
 
 module.exports = (app) => {
   // Todas las rutas bajo la autenticacion `/web/api`, protegido por autenticación
