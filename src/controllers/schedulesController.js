@@ -56,16 +56,15 @@ module.exports = {
     }
   },
   
-  getAllSchedules:async (req, res) => {
+  getAllSchedules: async (req, res) => {
     try {
-      const schedules = await Schedule.findAll({
-        where: { is_active: 1 },
-      });
+      const schedules = await Schedule.findAll();
       res.status(200).json(schedules);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
+  
    updateSchedule:async (req, res) => {
     try {
       const { schedule_id } = req.params;
@@ -82,25 +81,31 @@ module.exports = {
       res.status(500).json({ error: error.message });
     }
   },
-  // "Eliminar" un horario (cambiar is_active a 0)
- deleteSchedule:async (req, res) => {
-    const { id } = req.params;
+
+  updateSchedule: async (req, res) => {
+    const { schedule_id } = req.params; 
+    const { is_active } = req.body; 
 
     try {
-      const schedule = await schedule.findByPk(id);
-  
+      // Buscar el horario por ID
+      const schedule = await Schedule.findByPk(schedule_id);
+
       if (!schedule) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'Schedule not found' });
       }
-  
-      schedule.is_active = schedule.is_active === 1 ? 0 : 1;
-      await user.save();
-  
-      res.json({ message: 'User status updated to inactive' });
+
+      // Establecer el nuevo valor de is_active
+      schedule.is_active = is_active;
+      await schedule.save(); // Guardar los cambios
+
+      res.json({ message: 'Schedule status updated successfully' });
     } catch (error) {
-      res.status(500).json({ error: 'Error updating user status' });
+      console.error('Error updating schedule:', error); 
+      res.status(500).json({ error: 'Error updating schedule status' });
     }
-},
+  },
+  
+  
 getScheduleById: async (req, res) => {
   try {
     const { schedule_id } = req.params;
