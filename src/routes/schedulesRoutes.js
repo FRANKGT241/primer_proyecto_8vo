@@ -10,11 +10,9 @@ router.post('/schedules', schedulesController.createSchedule);
 
 router.get('/schedules', schedulesController.getAllSchedules);
 
+router.patch('/schedules/:schedule_id', schedulesController.updateSchedule);
 
 router.put('/schedules/:schedule_id', schedulesController.updateSchedule);
-
-
-router.patch('/schedules/:schedule_id', schedulesController.deleteSchedule);
 
 router.get('/schedules/:schedule_id', schedulesController.getScheduleById);
 
