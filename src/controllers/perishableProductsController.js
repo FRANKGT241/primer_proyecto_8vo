@@ -103,17 +103,22 @@ createProduct : async (req, res) => {
     const { id } = req.params;
 
     try {
-      const product = await PerishableProduct.findByPk(id, {
-        attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active', 'supplier_id'],
+      const inventory = await InventoryPerishable.findOne({
+        where: { inventory_id: id },
+        attributes: ['inventory_id', 'product_id'],
       });
 
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
+      const product = await PerishableProduct.findOne({
+        where: { product_id: inventory.product_id },
+        attributes: ['product_id', 'product_name', 'category_id', 'price', 'quantity', 'is_active', 'supplier_id'],
+      });
+  
 
-      res.json(product);
+      res.json({product});
+      
     } catch (error) {
-      res.status(500).json({ error: 'Error fetching product' });
+      res.status(500).json({ error: 'Error fetching product or inventory' });
+      console.log(error)
     }
   },
 

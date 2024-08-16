@@ -26,7 +26,7 @@ module.exports = {
 	async getCustomerById(req, res) {
 		try {
 			const customer = await customerModel.findByPk(req.params.customer_id, {
-				attributes: ['customer_id', 'name', 'email', 'phone', 'is_active'],
+				attributes: ['customer_id', 'full_name', 'email', 'phone', 'is_active'],
 			});
 			res.json(customer);
 		} catch (error) {

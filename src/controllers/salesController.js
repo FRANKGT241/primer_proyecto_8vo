@@ -238,11 +238,8 @@ updateSale: async (req, res) => {
         }, { transaction: t });
       }
 
-      // Calcular el total de la venta
       total += quantity * unit_price;
     }
-
-    // Eliminar detalles de venta que ya no están en el detalle
     const updatedInventoryIds = new Set(details.map(detail => detail.inventory_id));
     const obsoleteDetails = existingDetails.filter(detail => !updatedInventoryIds.has(detail.inventory_perishable_id) && !updatedInventoryIds.has(detail.inventory_non_perishable_id));
     for (let obsoleteDetail of obsoleteDetails) {
@@ -252,6 +249,7 @@ updateSale: async (req, res) => {
           where: { inventory_id: obsoleteDetail.inventory_perishable_id },
           transaction: t
         });
+        
       } else if (obsoleteDetail.inventory_non_perishable_id) {
         await InventoryNonPerishable.increment('quantity', {
           by: obsoleteDetail.quantity,
@@ -272,8 +270,6 @@ updateSale: async (req, res) => {
   }
 },
 
-
-
   getAllSales: async (req, res) => {
     try {
       const sales = await Sale.findAll();
@@ -289,43 +285,5 @@ updateSale: async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: 'Error al obtener los detalles de ventas', error: error.message });
     }
-  }
+  },
 };
-/*
-Cursl update:curl --location --request PUT 'http://localhost:3001/web/api/salesUpdate' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwicm9sZSI6IkVtcGxveWVlIiwiaWF0IjoxNzIzNTM2NTM0LCJleHAiOjE3MjM1NDAxMzR9.pw2XG6ObuRdT2NS5B1ebvAX1m8QSRX61KJpZQ_s-kRU' \
---data '{
-  "sale_id": 34,
-  "user_id": 6,
-  "details": [
-    {
-      "inventory_id": 34,
-      "quantity":0,
-      "unit_price": 25.00,
-      "product_type": "Perishable",
-      "customers_customer_id": 6
-    }
-  ]
-}
-'
-
-Curl create
-curl --location --request PUT 'http://localhost:3001/web/api/salesUpdate' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwicm9sZSI6IkVtcGxveWVlIiwiaWF0IjoxNzIzNTQwMzg0LCJleHAiOjE3MjM1NDM5ODR9.RtR-eYo-VQwrfTxRhOlIIR68Kcqn7yJTTqfrZzOlKSc' \
---data '{
-  "sale_id": 33,
-  "user_id": 6,
-  "details": [
-    {
-      "inventory_id": 34,
-      "quantity":2,
-      "unit_price": 10.00,
-      "product_type": "Perishable",
-      "customers_customer_id": 6
-    }
-  ]
-}
-'
-*/
